@@ -288,13 +288,16 @@ plt.loglog(
     label="$10^{13} < M < 10^{14}$",
 )
 plt.loglog(
-    Pkh5["k"], Pkh5["power"].real, label="$ 10^{14} > M (with shot)$"
+    Pkh5["k"], Pkh5["power"].real - Pkh5.attrs["shotnoise"], label="$ 10^{14} > M$"
 )
-# - Pkh5.attrs["shotnoise"]
+#
+''' 
 plt.loglog(
-    Pkh_rand["k"], Pkh_rand["power"].real, label="Poisson (with shot)",
+    Pkh_rand["k"], Pkh_rand["power"].real - Pkh_rand.attrs["shotnoise"], label="Poisson",
     linestyle='-.', color = 'black'
 )
+'''
+#
 
 plt.plot(kw, Pk, label="linear theory")
 # format the axes
