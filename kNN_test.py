@@ -15,6 +15,7 @@ matplotlib.rcParams['mathtext.fontset'] = 'cm'
 matplotlib.rcParams['text.color'] = 'black'
 matplotlib.rcParams["grid.color"] = 'grey'
 matplotlib.rcParams["grid.linestyle"] = '--'
+matplotlib.rcParams["figure.facecolor"] = 'white' 
 plt.rc("text", usetex=False)
 fig = plt.figure()
 
@@ -63,8 +64,11 @@ rho = 1/vol
 print (vol.shape[0])
 
 extent = 0.,1-dx, 0, 1-dx
+
 import mpl_toolkits.axes_grid1 as axes_grid1
-fig = plt.figure(frameon=False)
+fig = plt.figure(frameon=True)
+
+'''
 grid = axes_grid1.AxesGrid(
     fig, 111, nrows_ncols=(2, len(ks)), axes_pad = 0., cbar_location = "right",
     cbar_mode="edge", cbar_size="15%", cbar_pad="5%",)
@@ -111,4 +115,75 @@ grid.cbar_axes[0].colorbar(im0);
 grid.cbar_axes[1].colorbar(im1);
 
 fig.savefig('/home/bulk826/Desktop/Stanford/Research3/figures/kNN_test.png', dpi = 200, bbox_inches = 'tight')
+plt.show()
+'''
+
+def imCDFVolkNN(vol):
+    imCDF = vol.copy()
+    N = vol.shape[0]
+    l = vol.shape[1]
+    for c in range(l):
+        imCDF[:,c] = (1-(np.arange(0, N) + 1) / N)[np.argsort(vol[:,c])]
+    return imCDF
+
+def CDFVolkNN(vol):
+    CDF = []
+    N = vol.shape[0]
+    l = vol.shape[1]
+    gof = ((np.arange(0, N) + 1) / N)
+    for c in range(l):
+        ind = np.argsort(vol[:,c])
+        sVol= vol[ind,c]
+# return array of interpolating functions
+        CDF.append(interpolate.interp1d(sVol,gof, kind='linear', \
+                                        bounds_error=False))
+    return CDF
+
+
+bine = np.logspace(-4, 3, 1000)
+binw = bine[1:] - bine[:-1]
+binc = (bine[1:] + bine[:-1]) / 2
+
+cols = ('r','g','b','k')
+# CDF
+CDFs = CDFVolkNN(vol)
+dummyvpf = 1.-CDFs[0](binc)
+dummyvpf[np.isnan(dummyvpf)] = 0
+VPF = interpolate.interp1d(binc,dummyvpf,kind='linear', bounds_error=False,fill_value=(0.,0.))
+
+print(binc)
+
+
+for kp in range(len(ks)):
+#    plt.plot(np.sort(vol[:,kp]),(np.arange(Ngp)+1)/Ngp,'.'+cols[kp],label=r"CDF($V_{"+str(ks[kp])+"NN}<V)$", ms=5)
+    ID_rise = np.where((CDFs[kp])(binc) <= 0.5)[0]
+    ID_drop = np.where((CDFs[kp])(binc) > 0.5)[0]
+    plt.plot(binc[ID_rise],(CDFs[kp])(binc)[ID_rise],'-',lw=2+kp*1.,label=r"CDF($V_{"+str(ks[kp])+"NN}<V)$")
+    plt.plot(binc[ID_drop],1-(CDFs[kp])(binc)[ID_drop],'-',lw=2+kp*1.)#,label=r"1 - CDF($V_{"+str(ks[kp])+"NN}<V)$")
+
+#for kp in range(len(ks)):
+#    plt.plot(np.sort(vol[:,kp]),1-(np.arange(Ngp)+1)/Ngp,cols[kp], label=r"1-CDF($V_{"+str(ks[kp])+"NN}<V)$",ms=1.5,alpha=.5)
+#plt.plot(np.sort(vol[:,1]*2-vol[:,0]),1-(np.arange(Ngp)+1)/Ngp, 'b.', label=r"($V_{2NN}-V_{1NN}<V)$", ms=1.5,alpha=.005)
+'''
+plt.plot(binc, 1-poisson.cdf(0,binc), '--', lw=6, alpha=.3, label='poisson 1-CDF $k=0$')
+plt.plot(binc, 1-poisson.cdf(1,binc*2), '--', lw=6, alpha=.3, label='poisson 1-CDF $k=1$')
+plt.plot(binc, 1-poisson.cdf(9,binc*10), '--', lw=6, alpha=.3, label='poisson 1-CDF $k=9$')
+plt.plot(binc, 1-poisson.cdf(49,binc*50), '--', lw=6, alpha=.3, label='poisson 1-CDF $k=49$')
+'''
+#plt.plot(binc, np.exp(-binc),'--',lw=8, alpha=.3, label="$e^{-V}$")
+#plt.plot(binc, np.exp(-binc*2)*(1+binc*2),'--',lw=8, alpha=.3, label="$e^{-2 V}(1 + 2V)$")
+#plt.plot(binc, np.exp(-binc*5)*(1+binc*5+(binc*5)**2/2+(binc*5)**3/6+(binc*5)**4/24),lw=8,alpha=.3)
+
+plt.grid(color='k', linestyle='--', linewidth=1,alpha=.2,which='both',axis='both')
+plt.grid(color='k', linestyle='-', linewidth=2,alpha=.2,which='major',axis='both')
+
+plt.xlabel("Volume")
+plt.ylabel("Probability")
+plt.xscale('log')
+plt.yscale('log')
+plt.xlim(1e-2,6)
+plt.ylim(1e-3,0.6)
+plt.legend(loc='upper right',fontsize=5)
+
+fig.savefig('/home/bulk826/Desktop/Stanford/Research3/figures/kNN_test_peak.png', dpi = 200, bbox_inches = 'tight')
 plt.show()

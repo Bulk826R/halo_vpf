@@ -246,6 +246,8 @@ print('m = ', m14)
 print('len m', len(m14))
 print('len m14 = ', len(m14[ithresh[4] :, :]))
 
+seed = 42
+np.random.seed(seed)
 rand_x = np.random.rand(len(m14[ithresh[4] :, :])) * 250
 rand_y = np.random.rand(len(m14[ithresh[4] :, :])) * 250
 rand_z = np.random.rand(len(m14[ithresh[4] :, :])) * 250
@@ -258,7 +260,7 @@ pcat = ArrayCatalog(
 )
 
 Pkh_rand = FFTPower(pcat, mode="1d", Nmesh=256, BoxSize=250).power
-
+'''
 ##########################################
 # print the shot noise subtracted P(k)
 plt.loglog(Pkp["k"], Pkp["power"].real - Pkp.attrs["shotnoise"], label="DM particles")
@@ -291,12 +293,12 @@ plt.loglog(
     Pkh5["k"], Pkh5["power"].real - Pkh5.attrs["shotnoise"], label="$ 10^{14} > M$"
 )
 #
-''' 
+ 
 plt.loglog(
     Pkh_rand["k"], Pkh_rand["power"].real - Pkh_rand.attrs["shotnoise"], label="Poisson",
     linestyle='-.', color = 'black'
 )
-'''
+
 #
 
 plt.plot(kw, Pk, label="linear theory")
@@ -307,4 +309,123 @@ plt.ylabel(r"$P(k)$ [$h^{-3}\mathrm{Mpc}^3$]")
 plt.xlim(0.01, 3.6)
 plt.ylim(10, 4e5)
 fig.savefig('/home/bulk826/Desktop/Stanford/Research3/figures/bolshoi_tp.png', dpi = 400, bbox_inches = 'tight')
+plt.show()
+'''
+
+from Corrfunc.theory.vpf import vpf
+
+rmax = 5.0
+#rmax = 5.0
+nbins = 15
+#nspheres = 100
+nspheres = 5000
+numpN = 135
+seed = 42
+# FIRST THE POISSON DISTRIBUTION
+vpfp = vpf(
+    rmax,
+    nbins,
+    nspheres,
+    numpN,
+    seed,
+    X,
+    Y,
+    Z,
+    #rand_x,
+    #rand_y,
+    #rand_z,
+    periodic=True,
+    boxsize=250,
+    verbose=True,
+)
+
+print (vpfp["pN"])
+
+xNN = np.arange(len(vpfp["pN"][0]))
+print (xNN)
+'''
+for i, rad in enumerate(vpfp["rmax"]):
+    print(i)
+for i, rad in enumerate(vpfp["rmax"]):
+    plt.plot(xNN, vpfp["pN"][i], "X-", label=r"R = {0:8.2f}".format(rad))
+
+plt.xlabel("Counts per sphere")
+plt.ylabel("fraction of spheres")
+plt.xscale('linear')
+plt.yscale('log')
+plt.title("VPF and CIC for Poisson")
+plt.ylim(1e-5, 1)
+plt.xlim(0, 60)
+
+plt.legend(loc = 'upper right', fontsize = 8)
+
+fig.savefig('/home/bulk826/Desktop/Stanford/Research3/figures/cic_test.png', dpi = 200, bbox_inches = 'tight')
+plt.show()
+'''
+
+vpfh5 = vpf(
+    rmax,
+    nbins,
+    nspheres,
+    numpN,
+    seed,
+    halos["halo_x"][ithresh[4] :],
+    halos["halo_y"][ithresh[4] :],
+    halos["halo_z"][ithresh[4] :],
+    periodic=True,
+    boxsize=250,
+    verbose=True,
+)
+
+vpfp = vpf(
+    rmax,
+    nbins,
+    nspheres,
+    numpN,
+    seed,
+    rand_x,
+    rand_y,
+    rand_z,
+    periodic=True,
+    boxsize=250,
+    verbose=True,
+)
+
+VNN = vpfp["rmax"] ** 3 * 4 * np.pi / 3
+
+numpN = 1250
+vpfr = vpf(
+    rmax,
+    nbins,
+    nspheres,
+    numpN,
+    seed,
+    particles["x"],
+    particles["y"],
+    particles["z"],
+    periodic=True,
+    boxsize=250,
+    verbose=True,
+)
+VNNr = vpfr["rmax"] ** 3 * 4 * np.pi / 3
+
+lw = 4
+
+plt.loglog(VNN, vpfp["pN"][:, 0], "X-", label=r"Poisson", linewidth=4)
+
+VNN5 = vpfh5["rmax"] ** 3 * 4 * np.pi / 3
+plt.loglog(
+    VNN5,
+    vpfh5["pN"][:, 0],
+    "X-",
+    linewidth=lw,
+    label="$ 10^{14} > M $",
+)
+
+#plt.ylim(1e-2, 2)
+plt.legend(loc = 'lower left', fontsize = 12)
+plt.xlabel(r"$V/\bar{V}$")
+plt.ylabel("fraction of empty spheres")
+
+fig.savefig('/home/bulk826/Desktop/Stanford/Research3/figures/cic_2.png', dpi = 200, bbox_inches = 'tight')
 plt.show()
