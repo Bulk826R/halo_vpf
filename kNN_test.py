@@ -30,7 +30,7 @@ def VolumekNN(xin, xout, k=1, periodic=0):
         vol[:,c] = Cr * dis[:,c]**dim/k
     return vol
 
-#random test
+#random test sdf
 
 Npoints = 4096
 uni_Nl = 600
