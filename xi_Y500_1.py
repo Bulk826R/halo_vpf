@@ -194,7 +194,7 @@ rand_Y = R_3D[:, 1] + boxsize
 rand_Z = R_3D[:, 2] + boxsize
 rand_N = len(rand_X)
 
-nbins = 50
+nbins = 20
 #bins = np.logspace(1.2, 3.2, nbins + 1) # note that +1 to nbins
 bins = np.logspace(0.8, 3.2, nbins + 1) 
 autocorr=1
@@ -398,8 +398,13 @@ plt.subplots_adjust(wspace = 0.24, hspace = 0.42)
 
 ax1 = fig.add_subplot(2, 1, 1)
 #!!!!!!!!!!!!!!!!!
+'''
 ax1.plot(bins[:-1][id_cf], cf_sz[id_cf], lw = 2., color = 'royalblue', alpha = 0.8,
          label = r'Planck SZ ($Y_{5R_{500}}\geqslant 3\times 10^{-3}\,\mathrm{arcmin^{2}}$)')
+'''
+ax1.scatter(bins[:-1][id_cf], cf_sz[id_cf], color = 'royalblue', s = 82, lw = 0.8, 
+            facecolors = 'None', marker = 'D', rasterized = True, alpha = 0.8, 
+            label = r'Planck SZ ($Y_{5R_{500}}\geqslant 3\times 10^{-3}\,\mathrm{arcmin^{2}}$)')
 #!!!!!!!!!!!!!!!!!
 ax1.plot(bins[:-1][id_poi], CF_mean, lw = 1.6, alpha = 0.8, color = 'crimson', 
          dashes = (5, 2.4), label = r'Poisson randoms ('+str(len_poi)+') median')
@@ -436,7 +441,10 @@ ax12.tick_params(which='minor', length=0.)
 
 ax2 = fig.add_subplot(2, 1, 2)
 
-ax2.plot(bins[:-1][id_poi], dCF, lw = 2., color = 'black', alpha = 0.5, label = r'Planck SZ')
+#ax2.plot(bins[:-1][id_poi], dCF, lw = 2., color = 'black', alpha = 0.5, label = r'Planck SZ')
+ax2.scatter(bins[:-1][id_poi], dCF, lw = 0.8, color = 'black', alpha = 0.5, facecolors = 'None',
+            marker = 'D', s = 82, rasterized = True, label = r'Planck SZ')
+
 V1 = np.min(bins[:-1][id_poi])
 V2 = np.max(bins[:-1][id_poi])
 x = np.linspace(V1, V2, 10)
