@@ -196,7 +196,7 @@ rand_Y = R_3D[:, 1] + boxsize
 rand_Z = R_3D[:, 2] + boxsize
 rand_N = len(rand_X)
 
-nbins = 50
+nbins = 20
 #bins = np.logspace(1.2, 3.2, nbins + 1) # note that +1 to nbins
 bins = np.logspace(0.8, 3.2, nbins + 1) 
 autocorr=1
